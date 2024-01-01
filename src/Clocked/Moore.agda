@@ -226,7 +226,7 @@ apᵏ-homo : {f : B → C} {x : B}
          → apᵏ {k} {A = A} (pureᵏ f) (pureᵏ x) ＝ pureᵏ (f x)
 apᵏ-homo {k} {f} {x} = fix {k} λ ih▹ →
     ap (apᵏ (pureᵏ f)) (fix-path (pureᵏ-body x))
-  ∙ ap (λ q → apᵏ q (pureᵏ-body x (next (pureᵏ x)))) (fix-path (pureᵏ-body f))    
+  ∙ ap (λ q → apᵏ q (pureᵏ-body x (next (pureᵏ x)))) (fix-path (pureᵏ-body f))
   ∙ ap (λ q → q (pureᵏ-body f (next (pureᵏ f))) (pureᵏ-body x (next (pureᵏ x)))) (fix-path apᵏ-body)
   ∙ ap (Mreᵏ (f x)) (fun-ext λ a → ▹-ext ih▹)
   ∙ sym (fix-path (pureᵏ-body (f x)))
@@ -242,7 +242,7 @@ apᵏ-inter {k} {x} = fix {k} λ ih▹ → λ where
   mf@(Mreᵏ bf trf) →
      ap (apᵏ mf) (fix-path (pureᵏ-body x))
    ∙ ap (λ q → q mf (pureᵏ-body x (next (pureᵏ x)))) (fix-path apᵏ-body)
-   ∙ ap (Mreᵏ (bf x)) (fun-ext (λ a → ▹-ext (ih▹ ⊛ trf a))) 
+   ∙ ap (Mreᵏ (bf x)) (fun-ext (λ a → ▹-ext (ih▹ ⊛ trf a)))
    ∙ ap (λ q → q (pureᵏ-body (_$ x) (next (pureᵏ (_$ x)))) mf) (sym $ fix-path apᵏ-body)
    ∙ ap (λ q → apᵏ q mf) (sym $ fix-path (pureᵏ-body (_$ x)))
 
@@ -254,19 +254,19 @@ apᵐ-inter mf = fun-ext (apᵏ-inter ∘ mf)
 -- zipWith
 
 zipWithᵏ : (B → C → D) → gMoore k A B → gMoore k A C → gMoore k A D
-zipWithᵏ f mb mc = apᵏ (mapᵏ f mb) mc 
+zipWithᵏ f mb mc = apᵏ (mapᵏ f mb) mc
 
 zipWithᵐ : (B → C → D) → Moore A B → Moore A C → Moore A D
-zipWithᵐ f mb mc = apᵐ (mapᵐ f mb) mc 
+zipWithᵐ f mb mc = apᵐ (mapᵐ f mb) mc
 
-zipWithᵏ-assoc : {f : B → B → B} 
-                 {m1 m2 m3 : gMoore k A B} 
+zipWithᵏ-assoc : {f : B → B → B}
+                 {m1 m2 m3 : gMoore k A B}
                → (∀ x y z → f (f x y) z ＝ f x (f y z))
-               → zipWithᵏ f (zipWithᵏ f m1 m2) m3 ＝ zipWithᵏ f m1 (zipWithᵏ f m2 m3) 
+               → zipWithᵏ f (zipWithᵏ f m1 m2) m3 ＝ zipWithᵏ f m1 (zipWithᵏ f m2 m3)
 zipWithᵏ-assoc {f} {m1} {m2} {m3} fa =
   zipWithᵏ f (zipWithᵏ f m1 m2) m3
     ＝⟨⟩
-  apᵏ (mapᵏ f (apᵏ (mapᵏ f m1) m2)) m3  
+  apᵏ (mapᵏ f (apᵏ (mapᵏ f m1) m2)) m3
     ＝⟨ ap (λ q → apᵏ q m3) (sym (apᵏ-map (apᵏ (mapᵏ f m1) m2))) ⟩
   apᵏ (apᵏ (pureᵏ f) (apᵏ (mapᵏ f m1) m2)) m3
     ＝⟨ ap (λ q → apᵏ q m3) (sym (apᵏ-comp (mapᵏ f m1) (pureᵏ f) m2)) ⟩
@@ -303,11 +303,91 @@ zipWithᵏ-assoc {f} {m1} {m2} {m3} fa =
   zipWithᵏ f m1 (zipWithᵏ f m2 m3)
     ∎
 
-zipWithᵐ-assoc : {f : B → B → B} 
-                 {m1 m2 m3 : Moore A B} 
+zipWithᵐ-assoc : {f : B → B → B}
+                 {m1 m2 m3 : Moore A B}
                → (∀ x y z → f (f x y) z ＝ f x (f y z))
-               → zipWithᵐ f (zipWithᵐ f m1 m2) m3 ＝ zipWithᵐ f m1 (zipWithᵐ f m2 m3) 
+               → zipWithᵐ f (zipWithᵐ f m1 m2) m3 ＝ zipWithᵐ f m1 (zipWithᵐ f m2 m3)
 zipWithᵐ-assoc fa = fun-ext λ k → zipWithᵏ-assoc fa
+
+zipWithᵏ-id-l : {f : B → C → C}
+                {x : B} {m : gMoore k A C}
+              → (∀ y → f x y ＝ y)
+              → zipWithᵏ f (pureᵏ x) m ＝ m
+zipWithᵏ-id-l {f} {x} {m} fi =
+  zipWithᵏ f (pureᵏ x) m
+    ＝⟨⟩
+  apᵏ (mapᵏ f (pureᵏ x)) m
+    ＝⟨ ap (λ q → apᵏ q m) (sym $ apᵏ-map (pureᵏ x)) ⟩
+  apᵏ (apᵏ (pureᵏ f) (pureᵏ x)) m
+    ＝⟨ ap (λ q → apᵏ q m) apᵏ-homo ⟩
+  apᵏ (pureᵏ (f x)) m
+    ＝⟨ apᵏ-map m ⟩
+  mapᵏ (f x) m
+    ＝⟨ ap (λ q → mapᵏ q m) (fun-ext fi) ⟩
+  mapᵏ id m
+    ＝⟨ mapᵏ-id m ⟩
+  m
+    ∎
+
+zipWithᵐ-id-l : {f : B → C → C}
+                {x : B} {m : Moore A C}
+              → (∀ y → f x y ＝ y)
+              → zipWithᵐ f (pureᵐ x) m ＝ m
+zipWithᵐ-id-l fi = fun-ext λ k → zipWithᵏ-id-l fi
+
+-- are these provable just with applicative laws?
+
+zipWithᵏ-comm : {f : B → B → C}
+              → (∀ x y → f x y ＝ f y x)
+              → ∀ (m1 m2 : gMoore k A B)
+              → zipWithᵏ f m1 m2 ＝ zipWithᵏ f m2 m1
+zipWithᵏ-comm {k} {f} fc = fix {k} λ ih▹ → λ where
+  m1@(Mreᵏ b1 tr1) m2@(Mreᵏ b2 tr2) →
+    zipWithᵏ f m1 m2
+      ＝⟨⟩
+    apᵏ (mapᵏ f m1) m2
+      ＝⟨ ap (λ q → apᵏ (q m1) m2) (fix-path (mapᵏ-body f)) ⟩
+    apᵏ (mapᵏ-body f (next (mapᵏ f)) m1) m2
+      ＝⟨ ap (λ q → q (mapᵏ-body f (next (mapᵏ f)) m1) m2) (fix-path apᵏ-body) ⟩
+    apᵏ-body (next apᵏ) (mapᵏ-body f (next (mapᵏ f)) m1) m2
+      ＝⟨ ap² Mreᵏ (fc b1 b2) (fun-ext λ a → ▹-ext (ih▹ ⊛ tr1 a ⊛′ tr2 a))  ⟩
+    apᵏ-body (next apᵏ) (mapᵏ-body f (next (mapᵏ f)) m2) m1
+      ＝⟨ ap (λ q → q (mapᵏ-body f (next (mapᵏ f)) m2) m1) (sym $ fix-path apᵏ-body) ⟩
+    apᵏ (mapᵏ-body f (next (mapᵏ f)) m2) m1
+      ＝⟨ ap (λ q → apᵏ (q m2) m1) (sym $ fix-path (mapᵏ-body f)) ⟩
+    apᵏ (mapᵏ f m2) m1
+      ＝⟨⟩
+    zipWithᵏ f m2 m1
+      ∎
+
+zipWithᵐ-comm : {f : B → B → C}
+              → (∀ x y → f x y ＝ f y x)
+              → ∀ (m1 m2 : Moore A B)
+              → zipWithᵐ f m1 m2 ＝ zipWithᵐ f m2 m1
+zipWithᵐ-comm fc m1 m2 = fun-ext λ k → zipWithᵏ-comm fc (m1 k) (m2 k)
+
+zipWithᵏ-idem : {f : B → B → B}
+              → (∀ x → f x x ＝ x)
+              → ∀ (m : gMoore k A B)
+              → zipWithᵏ f m m ＝ m
+zipWithᵏ-idem {k} {f} fi = fix {k} λ ih▹ → λ where
+  m@(Mreᵏ b tr) →
+    zipWithᵏ f m m
+      ＝⟨⟩
+    apᵏ (mapᵏ f m) m
+      ＝⟨ ap (λ q → apᵏ (q m) m) (fix-path (mapᵏ-body f)) ⟩
+    apᵏ (mapᵏ-body f (next (mapᵏ f)) m) m
+      ＝⟨ ap (λ q → q (mapᵏ-body f (next (mapᵏ f)) m) m) (fix-path apᵏ-body) ⟩
+    apᵏ-body (next apᵏ) (mapᵏ-body f (next (mapᵏ f)) m) m
+      ＝⟨ ap² Mreᵏ (fi b) (fun-ext λ a → ▹-ext (ih▹ ⊛ tr a)) ⟩
+    m
+      ∎
+
+zipWithᵐ-idem : {f : B → B → B}
+              → (∀ x → f x x ＝ x)
+              → ∀ (m : Moore A B)
+              → zipWithᵐ f m m ＝ m
+zipWithᵐ-idem fi m = fun-ext λ k → zipWithᵏ-idem fi (m k)
 
 -- comonad
 

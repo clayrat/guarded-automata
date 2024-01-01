@@ -6,7 +6,7 @@ open import Data.Bool
 open import Data.Dec
 open import Data.List
 
-open import LaterCl
+open import Later
 open import Clocked.Moore
 
 private variable
@@ -72,3 +72,45 @@ _＊ l k = starᵏ (l k)
 union-assoc : {k l m : Lang A}
             → (k ⋃ l) ⋃ m ＝ k ⋃ (l ⋃ m)
 union-assoc = zipWithᵐ-assoc or-assoc
+
+inter-assoc : {k l m : Lang A}
+            → (k ⋂ l) ⋂ m ＝ k ⋂ (l ⋂ m)
+inter-assoc = zipWithᵐ-assoc and-assoc
+
+union-comm : {k l : Lang A}
+           → k ⋃ l ＝ l ⋃ k
+union-comm {k} {l} = zipWithᵐ-comm or-comm k l
+
+inter-comm : {k l : Lang A}
+           → k ⋂ l ＝ l ⋂ k
+inter-comm {k} {l} = zipWithᵐ-comm and-comm k l
+
+union-idem : {l : Lang A}
+           → l ⋃ l ＝ l
+union-idem {l} = zipWithᵐ-idem or-idem l
+
+inter-idem : {l : Lang A}
+           → l ⋂ l ＝ l
+inter-idem {l} = zipWithᵐ-idem and-idem l
+
+union-empty-l : {l : Lang A}
+              → ⊘ ⋃ l ＝ l
+union-empty-l {l} = zipWithᵐ-id-l λ _ → refl
+
+-- TODO we don't have an ICM solver in c-m yet
+
+union-union-distr : {k l m : Lang A}
+                  → (k ⋃ l) ⋃ m ＝ (k ⋃ m) ⋃ (l ⋃ m)
+union-union-distr {k} {l} {m} =
+  (k ⋃ l) ⋃ m
+    ＝⟨ union-assoc ⟩
+  (k ⋃ (l ⋃ m))
+    ＝⟨ ap (λ q → k ⋃ (l ⋃ q)) (sym union-idem) ⟩
+  (k ⋃ (l ⋃ (m ⋃ m)))
+    ＝⟨ ap (λ q → k ⋃ q) (sym union-assoc) ⟩
+  (k ⋃ ((l ⋃ m) ⋃ m))
+    ＝⟨ ap (λ q → k ⋃ q) union-comm ⟩
+  (k ⋃ (m ⋃ (l ⋃ m)))
+    ＝⟨ sym union-assoc ⟩
+  (k ⋃ m) ⋃ (l ⋃ m)
+    ∎
