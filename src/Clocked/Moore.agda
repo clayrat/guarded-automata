@@ -86,14 +86,14 @@ Mre-inj : {bx by : B} {kx ky : A → Moore A B}
 Mre-inj e = Mreᵏ-inj (happly e k0) .fst
           , fun-ext λ a → fun-ext (force (λ k → ▹-ap (happly (Mreᵏ-inj (happly e k) .snd) a)))
 
+-- coiteration
+
 unfoldᵏ-body : (C → B × (A → C))
              → ▹ k (C → gMoore k A B)
              → C → gMoore k A B
 unfoldᵏ-body f u▹ c =
   let (b , g) = f c in
     Mreᵏ b λ a → u▹ ⊛ next (g a)
-
--- coiteration
 
 unfoldᵏ : (C → B × (A → C)) → C → gMoore k A B
 unfoldᵏ f = fix (unfoldᵏ-body f)
@@ -254,7 +254,7 @@ apᵐ-inter mf = fun-ext (apᵏ-inter ∘ mf)
 -- zipWith
 
 zipWithᵏ : (B → C → D) → gMoore k A B → gMoore k A C → gMoore k A D
-zipWithᵏ f mb mc = apᵏ (mapᵏ f mb) mc
+zipWithᵏ f = apᵏ ∘ mapᵏ f
 
 zipWithᵏ-eq : {f : B → C → D} {b : gMoore k A B} {c : gMoore k A C}
             → zipWithᵏ f b c ＝ apᵏ-body (next apᵏ) (mapᵏ-body f (next (mapᵏ f)) b) c
@@ -262,7 +262,7 @@ zipWithᵏ-eq {f} {b} {c} = ap (λ q → apᵏ (q b) c) (fix-path (mapᵏ-body f
                         ∙ ap (λ q → q (mapᵏ-body f (next (fix (mapᵏ-body f))) b) c) (fix-path apᵏ-body)
 
 zipWithᵐ : (B → C → D) → Moore A B → Moore A C → Moore A D
-zipWithᵐ f mb mc = apᵐ (mapᵐ f mb) mc
+zipWithᵐ f = apᵐ ∘ mapᵐ f
 
 zipWithᵏ-assoc : {f : B → B → B}
                  {m1 m2 m3 : gMoore k A B}
@@ -340,7 +340,7 @@ zipWithᵐ-id-l : {f : B → C → C}
               → zipWithᵐ f (pureᵐ x) m ＝ m
 zipWithᵐ-id-l fi = fun-ext λ k → zipWithᵏ-id-l fi
 
--- are these provable just with applicative laws?
+-- are any of these provable just with applicative laws?
 
 zipWithᵏ-comm : {f : B → B → C}
               → (∀ x y → f x y ＝ f y x)
@@ -422,4 +422,3 @@ catᵏ : gMoore k A B → gMoore k B C → gMoore k A C
 catᵏ = fix catᵏ-body
 
 -- TODO mfix ?
-
