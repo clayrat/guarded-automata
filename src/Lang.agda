@@ -144,14 +144,14 @@ union-unionᵏ-distr : {k l m : gLang κ A}
 union-unionᵏ-distr {k} {l} {m} =
   (k ⋃ᵏ l) ⋃ᵏ m
     ＝⟨ unionᵏ-assoc ⟩
-  (k ⋃ᵏ (l ⋃ᵏ m))
-    ＝⟨ ap (λ q → k ⋃ᵏ (l ⋃ᵏ q)) (sym unionᵏ-idem) ⟩
-  (k ⋃ᵏ (l ⋃ᵏ (m ⋃ᵏ m)))
-    ＝⟨ ap (λ q → k ⋃ᵏ q) (sym unionᵏ-assoc) ⟩
-  (k ⋃ᵏ ((l ⋃ᵏ m) ⋃ᵏ m))
-    ＝⟨ ap (λ q → k ⋃ᵏ q) unionᵏ-comm ⟩
+  (k ⋃ᵏ (l ⋃ᵏ ⌜ m ⌝))
+    ＝˘⟨ ap¡ unionᵏ-idem ⟩
+  (k ⋃ᵏ ⌜ l ⋃ᵏ (m ⋃ᵏ m) ⌝)
+    ＝˘⟨ ap¡ unionᵏ-assoc ⟩
+  (k ⋃ᵏ ⌜ (l ⋃ᵏ m) ⋃ᵏ m ⌝)
+    ＝⟨ ap! unionᵏ-comm ⟩
   (k ⋃ᵏ (m ⋃ᵏ (l ⋃ᵏ m)))
-    ＝⟨ sym unionᵏ-assoc ⟩
+    ＝˘⟨ unionᵏ-assoc ⟩
   (k ⋃ᵏ m) ⋃ᵏ (l ⋃ᵏ m)
     ∎
 
@@ -160,14 +160,14 @@ unionᵏ-swap-inner : {k l m n : gLang κ A}
 unionᵏ-swap-inner {k} {l} {m} {n} =
   (k ⋃ᵏ l) ⋃ᵏ (m ⋃ᵏ n)
     ＝⟨ unionᵏ-assoc ⟩
-  (k ⋃ᵏ (l ⋃ᵏ (m ⋃ᵏ n)))
-    ＝⟨ ap (k ⋃ᵏ_) (sym unionᵏ-assoc) ⟩
-  (k ⋃ᵏ ((l ⋃ᵏ m) ⋃ᵏ n))
-    ＝⟨ ap (λ q → k ⋃ᵏ (q ⋃ᵏ n)) unionᵏ-comm ⟩
-  (k ⋃ᵏ ((m ⋃ᵏ l) ⋃ᵏ n))
-    ＝⟨ ap (k ⋃ᵏ_) unionᵏ-assoc ⟩
+  (k ⋃ᵏ ⌜ l ⋃ᵏ (m ⋃ᵏ n) ⌝)
+    ＝˘⟨ ap¡ unionᵏ-assoc ⟩
+  (k ⋃ᵏ (⌜ l ⋃ᵏ m ⌝ ⋃ᵏ n))
+    ＝⟨ ap! unionᵏ-comm ⟩
+  (k ⋃ᵏ ⌜ (m ⋃ᵏ l) ⋃ᵏ n ⌝)
+    ＝⟨ ap! unionᵏ-assoc ⟩
   (k ⋃ᵏ (m ⋃ᵏ (l ⋃ᵏ n)))
-    ＝⟨ sym unionᵏ-assoc ⟩
+    ＝˘⟨ unionᵏ-assoc ⟩
   (k ⋃ᵏ m) ⋃ᵏ (l ⋃ᵏ n)
     ∎
 
@@ -177,8 +177,8 @@ concat-union-distrib-lᵏ : (k l m : gLang κ A)
                         → (k ⋃ᵏ l) ·ᵏ m ＝ (k ·ᵏ m) ⋃ᵏ (l ·ᵏ m)
 concat-union-distrib-lᵏ {κ} = fix {k = κ} λ ih▹ → λ where
   k@(Mreᵏ kᵇ kᵏ) l@(Mreᵏ lᵇ lᵏ) m@(Mreᵏ mᵇ mᵏ) →
-    ((k ⋃ᵏ l) ·ᵏ m)
-      ＝⟨ ap (λ q → q ·ᵏ m) (zipWithᵏ-eq {f = _or_} {b = k} {c = l})  ⟩
+    (⌜ k ⋃ᵏ l ⌝ ·ᵏ m)
+      ＝⟨ ap! (zipWithᵏ-eq {f = _or_} {b = k} {c = l}) ⟩
     (apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) k) l ·ᵏ m)
       ＝⟨ ap (λ q → q (apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) k) l) m) (fix-path ·ᵏ-body) ⟩
     ·ᵏ-body (next _·ᵏ_) (apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) k) l) m
@@ -188,7 +188,7 @@ concat-union-distrib-lᵏ {κ} = fix {k = κ} λ ih▹ → λ where
     apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) (·ᵏ-body (next _·ᵏ_) k m)) (l ·ᵏ m)
       ＝⟨ ap (λ q → apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) (q k m)) (l ·ᵏ m)) (sym $ fix-path ·ᵏ-body)  ⟩
     apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) (k ·ᵏ m)) (l ·ᵏ m)
-      ＝⟨ sym (zipWithᵏ-eq {f = _or_} {b = k ·ᵏ m} {c = l ·ᵏ m}) ⟩
+      ＝˘⟨ zipWithᵏ-eq {f = _or_} {b = k ·ᵏ m} {c = l ·ᵏ m} ⟩
     ((k ·ᵏ m) ⋃ᵏ (l ·ᵏ m))
       ∎
    where
@@ -221,18 +221,18 @@ concat-union-distrib-rᵏ : (k l m : gLang κ A)
                         → k ·ᵏ (l ⋃ᵏ m) ＝ (k ·ᵏ l) ⋃ᵏ (k ·ᵏ m)
 concat-union-distrib-rᵏ {κ} = fix {k = κ} λ ih▹ → λ where
   k@(Mreᵏ kᵇ kᵏ) l@(Mreᵏ lᵇ lᵏ) m@(Mreᵏ mᵇ mᵏ) →
-    (k ·ᵏ (l ⋃ᵏ m))
-      ＝⟨ ap (k ·ᵏ_) (zipWithᵏ-eq {f = _or_} {b = l} {c = m}) ⟩
+    (k ·ᵏ ⌜ l ⋃ᵏ m ⌝)
+      ＝⟨ ap! (zipWithᵏ-eq {f = _or_} {b = l} {c = m}) ⟩
     (k ·ᵏ apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) l) m)
       ＝⟨ ap (λ q → q k (apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) l) m)) (fix-path ·ᵏ-body) ⟩
     ·ᵏ-body (next _·ᵏ_) k (apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) l) m)
       ＝⟨ ap² Mreᵏ (and-distrib-or-l kᵇ lᵇ mᵇ) (fun-ext λ a → ▹-ext (go {ih▹ = ih▹} {kᵇ} {kᵏ} {lᵇ} {lᵏ} {mᵇ} {mᵏ})) ⟩
     apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) (·ᵏ-body (next _·ᵏ_) k l)) (·ᵏ-body (next _·ᵏ_) k m)
-      ＝⟨ ap (λ q → apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) (·ᵏ-body (next _·ᵏ_) k l)) (q k m)) (sym $ fix-path ·ᵏ-body) ⟩
+      ＝˘⟨ ap (λ q → apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) (·ᵏ-body (next _·ᵏ_) k l)) (q k m)) (fix-path ·ᵏ-body) ⟩
     apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) (·ᵏ-body (next _·ᵏ_) k l)) (k ·ᵏ m)
-      ＝⟨ ap (λ q → apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) (q k l)) (k ·ᵏ m)) (sym $ fix-path ·ᵏ-body) ⟩
+      ＝˘⟨ ap (λ q → apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) (q k l)) (k ·ᵏ m)) (fix-path ·ᵏ-body) ⟩
     apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) (k ·ᵏ l)) (k ·ᵏ m)
-      ＝⟨ sym (zipWithᵏ-eq {f = _or_} {b = k ·ᵏ l} {c = k ·ᵏ m}) ⟩
+      ＝˘⟨ zipWithᵏ-eq {f = _or_} {b = k ·ᵏ l} {c = k ·ᵏ m} ⟩
     ((k ·ᵏ l) ⋃ᵏ (k ·ᵏ m))
       ∎
    where
@@ -273,9 +273,9 @@ concat-assocᵏ {κ} = fix {k = κ} λ ih▹ → λ where
     ·ᵏ-body (next _·ᵏ_) (·ᵏ-body (next _·ᵏ_) k l) m
       ＝⟨ ap² Mreᵏ (and-assoc kᵇ lᵇ mᵇ) (fun-ext λ a → ▹-ext (go {ih▹ = ih▹} {kᵇ} {kᵏ} {lᵇ} {lᵏ} {mᵇ} {mᵏ})) ⟩
     ·ᵏ-body (next _·ᵏ_) k (·ᵏ-body (next _·ᵏ_) l m)
-      ＝⟨ ap (λ q → q k (·ᵏ-body (next _·ᵏ_) l m)) (sym $ fix-path ·ᵏ-body) ⟩
+      ＝˘⟨ ap (λ q → q k (·ᵏ-body (next _·ᵏ_) l m)) (fix-path ·ᵏ-body) ⟩
     (k ·ᵏ ·ᵏ-body (next _·ᵏ_) l m)
-      ＝⟨ ap (λ q → k ·ᵏ (q l m)) (sym $ fix-path ·ᵏ-body) ⟩
+      ＝˘⟨ ap (λ q → k ·ᵏ (q l m)) (fix-path ·ᵏ-body) ⟩
     (k ·ᵏ (l ·ᵏ m))
       ∎
    where
@@ -311,14 +311,14 @@ concat-assoc k l m = fun-ext λ κ → concat-assocᵏ (k κ) (l κ) (m κ)
 concat-empty-lᵏ : (l : gLang κ A) → ∅ᵏ ·ᵏ l ＝ ∅ᵏ
 concat-empty-lᵏ {κ} = fix {k = κ} λ ih▹ → λ where
   l@(Mreᵏ lᵇ lᵏ) →
-    (∅ᵏ ·ᵏ l)
-      ＝⟨ ap (λ q → q ·ᵏ l) (fix-path (pureᵏ-body false)) ⟩
+    (⌜ ∅ᵏ ⌝ ·ᵏ l)
+      ＝⟨ ap! (fix-path (pureᵏ-body false)) ⟩
     (pureᵏ-body false (next ∅ᵏ) ·ᵏ l)
       ＝⟨ ap (λ q → q (pureᵏ-body false (next ∅ᵏ)) l) (fix-path ·ᵏ-body) ⟩
     ·ᵏ-body (next _·ᵏ_) (pureᵏ-body false (next ∅ᵏ)) l
       ＝⟨ ap (Mreᵏ false) (fun-ext λ _ → ▹-ext (ih▹ ⊛ next l)) ⟩
     pureᵏ-body false (next ∅ᵏ)
-      ＝⟨ sym $ fix-path (pureᵏ-body false) ⟩
+      ＝˘⟨ fix-path (pureᵏ-body false) ⟩
     ∅ᵏ
       ∎
 
@@ -328,14 +328,14 @@ concat-empty-l l = fun-ext λ κ → concat-empty-lᵏ (l κ)
 concat-empty-rᵏ : (l : gLang κ A) → l ·ᵏ ∅ᵏ ＝ ∅ᵏ
 concat-empty-rᵏ {κ} = fix {k = κ} λ ih▹ → λ where
   l@(Mreᵏ lᵇ lᵏ) →
-    (l ·ᵏ ∅ᵏ)
-      ＝⟨ ap (λ q → l ·ᵏ q) (fix-path (pureᵏ-body false)) ⟩
+    (l ·ᵏ ⌜ ∅ᵏ ⌝)
+      ＝⟨ ap! (fix-path (pureᵏ-body false)) ⟩
     (l ·ᵏ pureᵏ-body false (next ∅ᵏ))
       ＝⟨ ap (λ q → q l (pureᵏ-body false (next ∅ᵏ))) (fix-path ·ᵏ-body) ⟩
     ·ᵏ-body (next _·ᵏ_) l (pureᵏ-body false (next ∅ᵏ))
       ＝⟨ ap² Mreᵏ (and-absorb-r lᵇ) (fun-ext λ a → ▹-ext (go {ih▹ = ih▹} {lᵇ} {lᵏ})) ⟩
     pureᵏ-body false (next ∅ᵏ)
-      ＝⟨ sym $ fix-path (pureᵏ-body false) ⟩
+      ＝˘⟨ fix-path (pureᵏ-body false) ⟩
     ∅ᵏ
       ∎
     where
@@ -395,8 +395,8 @@ concat-unit-r l = fun-ext λ κ → concat-unit-rᵏ (l κ)
 
 star-emptyᵏ : (∅ᵏ {κ = κ} {A = A}) ＊ᵏ ＝ εᵏ
 star-emptyᵏ =
-  ∅ᵏ ＊ᵏ
-    ＝⟨ ap _＊ᵏ (fix-path (pureᵏ-body false)) ⟩
+  ⌜ ∅ᵏ ⌝ ＊ᵏ
+    ＝⟨ ap! (fix-path (pureᵏ-body false)) ⟩
   (pureᵏ-body false (next ∅ᵏ) ＊ᵏ)
     ＝⟨ ap (λ q → q (pureᵏ-body false (next ∅ᵏ))) (fix-path ＊ᵏ-body) ⟩
   ＊ᵏ-body (next _＊ᵏ) (pureᵏ-body false (next ∅ᵏ))
@@ -406,3 +406,42 @@ star-emptyᵏ =
 
 star-empty : (∅ {A = A}) ＊ ＝ ε
 star-empty = fun-ext λ κ → star-emptyᵏ
+
+star-concat-idemᵏ : (l : gLang κ A) → (l ＊ᵏ) ·ᵏ (l ＊ᵏ) ＝ l ＊ᵏ
+star-concat-idemᵏ {κ} = fix {k = κ} λ ih▹ → λ where
+  l@(Mreᵏ lᵇ lᵏ) →
+      ((l ＊ᵏ) ·ᵏ (l ＊ᵏ))
+        ＝⟨ ap (λ q → (q l ·ᵏ (l ＊ᵏ))) (fix-path ＊ᵏ-body) ⟩
+      (＊ᵏ-body (next _＊ᵏ) l ·ᵏ (l ＊ᵏ))
+        ＝⟨ ap (λ q → ＊ᵏ-body (next _＊ᵏ) l ·ᵏ q l) (fix-path ＊ᵏ-body) ⟩
+      (＊ᵏ-body (next _＊ᵏ) l ·ᵏ ＊ᵏ-body (next _＊ᵏ) l)
+        ＝⟨ ap (λ q → q (＊ᵏ-body (next _＊ᵏ) l) (＊ᵏ-body (next _＊ᵏ) l)) (fix-path ·ᵏ-body) ⟩
+      ·ᵏ-body (next _·ᵏ_) (＊ᵏ-body (next _＊ᵏ) l) (＊ᵏ-body (next _＊ᵏ) l)
+        ＝⟨ ap (Mreᵏ true) (fun-ext λ a → ▹-ext (go {ih▹ = ih▹} {lᵇ} {lᵏ} {a})) ⟩
+      ＊ᵏ-body (next _＊ᵏ) l
+        ＝˘⟨ ap (_$ l) (fix-path ＊ᵏ-body) ⟩
+      (l ＊ᵏ)
+        ∎
+    where
+    go : {ih▹ : ▹ κ ((l : gLang κ A) → ((l ＊ᵏ) ·ᵏ (l ＊ᵏ)) ＝ (l ＊ᵏ))}
+         {lᵇ : Bool} {lᵏ : A → ▹ κ (gMoore κ A Bool)}
+         {a : A}
+       → ▹[ α ∶ κ ] ((▹map _⋃ᵏ_ (▹map _·ᵏ_ (▹map _·ᵏ_ (lᵏ a) ⊛ next ((Mreᵏ lᵇ lᵏ) ＊ᵏ))
+                                         ⊛ next (Mreᵏ true (λ a₁ → ▹map _·ᵏ_ (lᵏ a₁) ⊛ next ((Mreᵏ lᵇ lᵏ) ＊ᵏ))))
+                             ⊛ (▹map _·ᵏ_ (lᵏ a) ⊛ (next ((Mreᵏ lᵇ lᵏ) ＊ᵏ)))) α)
+                     ＝
+                   ((lᵏ a α) ·ᵏ ((Mreᵏ lᵇ lᵏ) ＊ᵏ))
+    go {ih▹} {lᵇ} {lᵏ} {a} = λ α →
+       ((▹map _⋃ᵏ_ (▹map _·ᵏ_ (▹map _·ᵏ_ (lᵏ a) ⊛ next ((Mreᵏ lᵇ lᵏ) ＊ᵏ))
+                                         ⊛ next (Mreᵏ true (λ a₁ → ▹map _·ᵏ_ (lᵏ a₁) ⊛ next ((Mreᵏ lᵇ lᵏ) ＊ᵏ))))
+                             ⊛ (▹map _·ᵏ_ (lᵏ a) ⊛ (next ((Mreᵏ lᵇ lᵏ) ＊ᵏ)))) α)
+         ＝⟨ ap (λ q → ((lᵏ a α ·ᵏ (Mreᵏ lᵇ lᵏ ＊ᵏ)) ·ᵏ (Mreᵏ true q)) ⋃ᵏ (lᵏ a α ·ᵏ (Mreᵏ lᵇ lᵏ ＊ᵏ)))
+                (fun-ext λ a₁ → ▹-ext λ α₁ → ap (lᵏ a₁ α₁ ·ᵏ_) (λ i → pfix ＊ᵏ-body (~ i) α₁ (Mreᵏ lᵇ lᵏ))) ⟩
+       (⌜ (lᵏ a α ·ᵏ (Mreᵏ lᵇ lᵏ ＊ᵏ)) ·ᵏ (Mreᵏ lᵇ lᵏ ＊ᵏ) ⌝ ⋃ᵏ (lᵏ a α ·ᵏ (Mreᵏ lᵇ lᵏ ＊ᵏ)))
+         ＝⟨ ap! (concat-assocᵏ (lᵏ a α) (Mreᵏ lᵇ lᵏ ＊ᵏ) (Mreᵏ lᵇ lᵏ ＊ᵏ)) ⟩
+       ((lᵏ a α ·ᵏ ⌜ (Mreᵏ lᵇ lᵏ ＊ᵏ) ·ᵏ (Mreᵏ lᵇ lᵏ ＊ᵏ) ⌝) ⋃ᵏ (lᵏ a α ·ᵏ (Mreᵏ lᵇ lᵏ ＊ᵏ)))
+         ＝⟨ ap! ((ih▹ ⊛ next (Mreᵏ lᵇ lᵏ)) α) ⟩
+       ((lᵏ a α ·ᵏ (Mreᵏ lᵇ lᵏ ＊ᵏ)) ⋃ᵏ (lᵏ a α ·ᵏ (Mreᵏ lᵇ lᵏ ＊ᵏ)))
+         ＝⟨ unionᵏ-idem ⟩
+       ((lᵏ a α) ·ᵏ ((Mreᵏ lᵇ lᵏ) ＊ᵏ))
+         ∎
