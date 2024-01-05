@@ -445,3 +445,41 @@ star-concat-idemᵏ {κ} = fix {k = κ} λ ih▹ → λ where
          ＝⟨ unionᵏ-idem ⟩
        ((lᵏ a α) ·ᵏ ((Mreᵏ lᵇ lᵏ) ＊ᵏ))
          ∎
+
+star-concat-idem : (l : Lang A) → (l ＊) · (l ＊) ＝ l ＊
+star-concat-idem l = fun-ext λ κ → star-concat-idemᵏ (l κ)
+
+star-idemᵏ : (l : gLang κ A) → (l ＊ᵏ) ＊ᵏ ＝ l ＊ᵏ
+star-idemᵏ {κ} = fix {k = κ} λ ih▹ → λ where
+  l@(Mreᵏ lᵇ lᵏ) →
+     ((l ＊ᵏ) ＊ᵏ)
+       ＝⟨ ap (λ q → q l ＊ᵏ) (fix-path ＊ᵏ-body) ⟩
+     (＊ᵏ-body (next _＊ᵏ) l ＊ᵏ)
+       ＝⟨ ap (λ q → q (＊ᵏ-body (next _＊ᵏ) l)) (fix-path ＊ᵏ-body) ⟩
+     ＊ᵏ-body (next _＊ᵏ) (＊ᵏ-body (next _＊ᵏ) l)
+       ＝⟨ ap (Mreᵏ true) (fun-ext λ a → ▹-ext (go {ih▹ = ih▹} {lᵇ} {lᵏ} {a})) ⟩
+     ＊ᵏ-body (next _＊ᵏ) l
+       ＝˘⟨ ap (_$ l) (fix-path ＊ᵏ-body) ⟩
+     (l ＊ᵏ)
+       ∎
+   where
+   go : {ih▹ : ▹ κ ((l : gLang κ A) → ((l ＊ᵏ) ＊ᵏ) ＝ (l ＊ᵏ))}
+        {lᵇ : Bool} {lᵏ : A → ▹ κ (gMoore κ A Bool)}
+        {a : A}
+      → ▹[ α ∶ κ ] ((((lᵏ a α) ·ᵏ ((Mreᵏ lᵇ lᵏ) ＊ᵏ))) ·ᵏ ((Mreᵏ true (λ a₁ → ▹map _·ᵏ_ (lᵏ a₁) ⊛ (next ((Mreᵏ lᵇ lᵏ) ＊ᵏ)))) ＊ᵏ))
+                    ＝
+                  ((lᵏ a α) ·ᵏ ((Mreᵏ lᵇ lᵏ) ＊ᵏ))
+   go {ih▹} {lᵇ} {lᵏ} {a} = λ α →
+     ((((lᵏ a α) ·ᵏ ((Mreᵏ lᵇ lᵏ) ＊ᵏ))) ·ᵏ (Mreᵏ true ⌜ (λ a₁ → ▹map _·ᵏ_ (lᵏ a₁) ⊛ (next ((Mreᵏ lᵇ lᵏ) ＊ᵏ))) ⌝ ＊ᵏ ))
+       ＝⟨ ap! (fun-ext λ a₁ → ▹-ext λ α₁ → ap (lᵏ a₁ α₁ ·ᵏ_) λ i → pfix ＊ᵏ-body (~ i) α₁ (Mreᵏ lᵇ lᵏ)) ⟩
+     ((lᵏ a α ·ᵏ (Mreᵏ lᵇ lᵏ ＊ᵏ)) ·ᵏ ⌜ (Mreᵏ lᵇ lᵏ ＊ᵏ) ＊ᵏ ⌝)
+       ＝⟨ ap! ((ih▹ ⊛ next (Mreᵏ lᵇ lᵏ)) α) ⟩
+     ((lᵏ a α ·ᵏ (Mreᵏ lᵇ lᵏ ＊ᵏ)) ·ᵏ (Mreᵏ lᵇ lᵏ ＊ᵏ))
+       ＝⟨ concat-assocᵏ (lᵏ a α) ((Mreᵏ lᵇ lᵏ) ＊ᵏ) ((Mreᵏ lᵇ lᵏ) ＊ᵏ) ⟩
+     ((lᵏ a α) ·ᵏ ⌜ ((Mreᵏ lᵇ lᵏ) ＊ᵏ) ·ᵏ ((Mreᵏ lᵇ lᵏ) ＊ᵏ) ⌝)
+       ＝⟨ ap! (star-concat-idemᵏ (Mreᵏ lᵇ lᵏ)) ⟩
+     ((lᵏ a α) ·ᵏ ((Mreᵏ lᵇ lᵏ) ＊ᵏ))
+       ∎
+
+star-idem : (l : Lang A) → (l ＊) ＊ ＝ l ＊
+star-idem l = fun-ext λ κ → star-idemᵏ (l κ)
