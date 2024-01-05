@@ -72,15 +72,15 @@ _·ᵏ_ = fix ·ᵏ-body
 _·_ : Lang A → Lang A → Lang A
 _·_ a b k = (a k) ·ᵏ (b k)
 
-starᵏ-body : ▹ κ (gLang κ A → gLang κ A)
+＊ᵏ-body : ▹ κ (gLang κ A → gLang κ A)
             → gLang κ A → gLang κ A
-starᵏ-body s▹ l@(Mreᵏ _ k) = Mreᵏ true λ a → ▹map (_·ᵏ_) (k a) ⊛ (s▹ ⊛ next l)
+＊ᵏ-body s▹ l@(Mreᵏ _ k) = Mreᵏ true λ a → ▹map (_·ᵏ_) (k a) ⊛ (s▹ ⊛ next l)
 
-starᵏ : gLang κ A → gLang κ A
-starᵏ = fix starᵏ-body
+_＊ᵏ : gLang κ A → gLang κ A
+_＊ᵏ = fix ＊ᵏ-body
 
 _＊ : Lang A → Lang A
-_＊ l κ = starᵏ (l κ)
+_＊ l κ = (l κ) ＊ᵏ
 
 -- laws
 
@@ -390,3 +390,19 @@ concat-unit-rᵏ {κ} = fix {k = κ} λ ih▹ → λ where
 
 concat-unit-r : (l : Lang A) → l · ε ＝ l
 concat-unit-r l = fun-ext λ κ → concat-unit-rᵏ (l κ)
+
+-- Kleene star laws
+
+star-emptyᵏ : (∅ᵏ {κ = κ} {A = A}) ＊ᵏ ＝ εᵏ
+star-emptyᵏ =
+  ∅ᵏ ＊ᵏ
+    ＝⟨ ap _＊ᵏ (fix-path (pureᵏ-body false)) ⟩
+  (pureᵏ-body false (next ∅ᵏ) ＊ᵏ)
+    ＝⟨ ap (λ q → q (pureᵏ-body false (next ∅ᵏ))) (fix-path ＊ᵏ-body) ⟩
+  ＊ᵏ-body (next _＊ᵏ) (pureᵏ-body false (next ∅ᵏ))
+    ＝⟨ ap (Mreᵏ true) (fun-ext λ a → ▹-ext λ _ → concat-empty-lᵏ ((Mreᵏ false (λ _ → next ∅ᵏ)) ＊ᵏ)) ⟩
+  εᵏ
+    ∎
+
+star-empty : (∅ {A = A}) ＊ ＝ ε
+star-empty = fun-ext λ κ → star-emptyᵏ
