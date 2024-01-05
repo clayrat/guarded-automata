@@ -2,11 +2,13 @@
 module Lang where
 
 open import Prelude
+open import Data.Empty
 open import Data.Bool
 open import Data.Dec
 open import Data.List
 
 open import Later
+open import ClIrr
 open import Clocked.Moore
 
 private variable
@@ -483,3 +485,55 @@ star-idemᵏ {κ} = fix {k = κ} λ ih▹ → λ where
 
 star-idem : (l : Lang A) → (l ＊) ＊ ＝ l ＊
 star-idem l = fun-ext λ κ → star-idemᵏ (l κ)
+
+-- Arden’s rule
+
+star-from-recᵏ : (k l m : gLang κ A)
+               → νᵏ k ＝ false
+               → l ＝ (k ·ᵏ l) ⋃ᵏ m
+               → l ＝ (k ＊ᵏ) ·ᵏ m
+star-from-recᵏ {κ} = fix {k = κ} λ ih▹ → λ where
+  k@(Mreᵏ kᵇ kᵏ) l@(Mreᵏ lᵇ lᵏ) m@(Mreᵏ mᵇ mᵏ) ke le →
+    l
+      ＝⟨ le ⟩
+    ((k ·ᵏ l) ⋃ᵏ m)
+      ＝⟨ ap (λ q → q k l ⋃ᵏ m) (fix-path ·ᵏ-body) ⟩
+    (·ᵏ-body (next _·ᵏ_) k l ⋃ᵏ m)
+      ＝⟨ zipWithᵏ-eq {f = _or_} {c = m} ⟩
+    apᵏ-body (next apᵏ) (mapᵏ-body _or_ (next (mapᵏ _or_)) (·ᵏ-body (next _·ᵏ_) k l)) m
+      ＝⟨ ap² Mreᵏ (ap (λ q → q and lᵇ or mᵇ) ke) (fun-ext λ a → ▹-ext (go {ih▹ = ih▹} {kᵇ} {kᵏ} {lᵇ} {lᵏ} {mᵇ} {mᵏ} {ke} {le})) ⟩
+    ·ᵏ-body (next _·ᵏ_) (＊ᵏ-body (next _＊ᵏ) k) m
+      ＝˘⟨ ap (λ q → q (＊ᵏ-body (next _＊ᵏ) k) m) (fix-path ·ᵏ-body) ⟩
+    (＊ᵏ-body (next _＊ᵏ) k ·ᵏ m)
+      ＝˘⟨ ap (λ q → q k ·ᵏ m) (fix-path ＊ᵏ-body) ⟩
+    ((k ＊ᵏ) ·ᵏ m)
+     ∎
+   where
+   go : {ih▹ : ▹ κ ((k l m : gLang κ A) → νᵏ k ＝ false → l ＝ ((k ·ᵏ l) ⋃ᵏ m) → l ＝ ((k ＊ᵏ) ·ᵏ m))}
+        {kᵇ : Bool} {kᵏ : A → ▹ κ (gMoore κ A Bool)}
+        {lᵇ : Bool} {lᵏ : A → ▹ κ (gMoore κ A Bool)}
+        {mᵇ : Bool} {mᵏ : A → ▹ κ (gMoore κ A Bool)}
+        {ke : kᵇ ＝ false}
+        {le : Mreᵏ lᵇ lᵏ ＝ ((Mreᵏ kᵇ kᵏ ·ᵏ Mreᵏ lᵇ lᵏ) ⋃ᵏ Mreᵏ mᵇ mᵏ)}
+        {a : A}
+      → ▹[ α ∶ κ ] ((▹map _⋃ᵏ_ (condᵏ kᵇ (▹map _·ᵏ_ (kᵏ a) ⊛ next (Mreᵏ lᵇ lᵏ)) (lᵏ a)) ⊛ mᵏ a) α)
+                    ＝
+                  (condᵏ true (▹map _·ᵏ_ (▹map _·ᵏ_ (kᵏ a) ⊛ next ((Mreᵏ kᵇ kᵏ) ＊ᵏ)) ⊛ next (Mreᵏ mᵇ mᵏ)) (mᵏ a) α)
+   go {ih▹ = ih▹} {kᵇ = false} {kᵏ} {lᵇ} {lᵏ} {mᵇ} {mᵏ} {ke} {le} {a} = λ α →
+     ((kᵏ a α) ·ᵏ ⌜ Mreᵏ lᵇ lᵏ ⌝) ⋃ᵏ (mᵏ a α)
+       ＝⟨ ap! ((ih▹ ⊛ next (Mreᵏ false kᵏ) ⊛ next (Mreᵏ lᵇ lᵏ) ⊛ next (Mreᵏ mᵇ mᵏ) ⊛ next refl ⊛ next le) α) ⟩
+     (⌜(kᵏ a α) ·ᵏ (((Mreᵏ false kᵏ) ＊ᵏ) ·ᵏ (Mreᵏ mᵇ mᵏ)) ⌝ ⋃ᵏ (mᵏ a α))
+       ＝˘⟨ ap¡ (concat-assocᵏ (kᵏ a α) (Mreᵏ false kᵏ ＊ᵏ) (Mreᵏ mᵇ mᵏ)) ⟩
+     ((((kᵏ a α) ·ᵏ ((Mreᵏ false kᵏ) ＊ᵏ)) ·ᵏ (Mreᵏ mᵇ mᵏ)) ⋃ᵏ (mᵏ a α))
+       ∎
+   go {ih▹ = ih▹} {kᵇ = true}  {kᵏ} {lᵇ} {lᵏ} {mᵇ} {mᵏ} {ke} {le} {a} =
+     absurd (false≠true (sym ke))
+
+star-from-rec : (k l m : Lang A)
+              → νᵐ k ＝ false
+              → l ＝ (k · l) ⋃ m
+              → l ＝ (k ＊) · m
+star-from-rec k l m ke le =
+  fun-ext λ κ → star-from-recᵏ (k κ) (l κ) (m κ)
+                  (clock-irr (νᵏ ∘ k) ∙ ke)
+                  (happly le κ)
