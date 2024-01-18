@@ -1,7 +1,8 @@
 {-# OPTIONS --guarded #-}
 module Lang where
 
-open import Prelude
+import Prelude as P hiding (Tactic-bishop-finite ; ord→is-discrete)
+open P
 open import Data.Empty
 open import Data.Bool
 open import Data.Dec
@@ -42,10 +43,9 @@ trie = unfoldListᵐ
 ε : Lang A
 ε = Mre true λ _ → ∅
 
--- TODO how to use instances?
-char : ∀ {dA : is-discrete A}
+char : ⦃ dA : is-discrete A ⦄
      → A → Lang A
-char {dA} a = Mre false λ x → if ⌊ is-discrete-β dA x a ⌋ then ε else ∅
+char a = Mre false λ x → if ⌊ x ≟ a ⌋ then ε else ∅
 
 compl : Lang A → Lang A
 compl = mapᵐ not

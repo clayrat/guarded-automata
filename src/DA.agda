@@ -1,7 +1,8 @@
 {-# OPTIONS --guarded #-}
 module DA where
 
-open import Prelude
+import Prelude as P hiding (Tactic-bishop-finite ; ord→is-discrete)
+open P
 open import Data.Unit
 open import Data.Bool hiding (_⊕_)
 open import Data.Dec
@@ -47,17 +48,16 @@ lang da s κ = langᵏ da s
 data ST3 : 𝒰 where
   init acc err : ST3
 
--- TODO how to use instances?
-charA : ∀ {dA : is-discrete A}
+charA : ⦃ dA : is-discrete A ⦄
       → A → DA A ST3
-charA {A} {dA} a = mkDA cν cδ
+charA {A} a = mkDA cν cδ
   where
   cν : ST3 → Bool
   cν init = false
   cν acc = true
   cν err = false
   cδ : ST3 → A → ST3
-  cδ init x = if ⌊ is-discrete-β dA x a ⌋ then acc else err
+  cδ init x = if ⌊ x ≟ a ⌋ then acc else err
   cδ acc  x = err
   cδ err  x = err
 
@@ -107,3 +107,11 @@ powA-consᵏ {κ} da = fix {k = κ} λ ih▹ s ss →
 powA-cons : (da : DA A S) (s : S) (ss : List S)
           → lang (powA da) (s ∷ ss) ＝ lang da s ⋃ lang (powA da) ss
 powA-cons da s ss = fun-ext λ κ → powA-consᵏ da s ss
+
+-- composition automaton
+composeA : ∀ {S₁ S₂ : 𝒰 ℓ}
+         → DA A S₁ → S₂ → DA A S₂ → DA A (S₁ × List S₂)
+composeA da1 s da2 =
+  mkDA (λ s12 → DA.ν da1 (s12 .fst) and DA.ν da2 s or νs da2 (s12 .snd))
+       (λ s12 a → (  DA.δ da1 (s12 .fst) a)
+                   , δs da2 (if DA.ν da1 (s12 .fst) then s ∷ s12 .snd else s12 .snd) a)
