@@ -115,3 +115,78 @@ composeA da1 s da2 =
   mkDA (λ s12 → DA.ν da1 (s12 .fst) and DA.ν da2 s or νs da2 (s12 .snd))
        (λ s12 a → (  DA.δ da1 (s12 .fst) a)
                    , δs da2 (if DA.ν da1 (s12 .fst) then s ∷ s12 .snd else s12 .snd) a)
+
+composeA-genᵏ : ∀ {S₁ S₂ : 𝒰 ℓ}
+              → (da1 : DA A S₁) (da2 : DA A S₂)
+              → (s1 : S₁) → (s2 : S₂) (ss : List S₂)
+              → langᵏ {κ = κ} (composeA da1 s2 da2) (s1 , ss)
+                  ＝
+                (langᵏ da1 s1 ·ᵏ langᵏ da2 s2) ⋃ᵏ langᵏ (powA da2) ss
+composeA-genᵏ {A} {κ} {S₁} {S₂} da1 da2 = fix {k = κ} λ ih▹ s1 s2 ss →
+  langᵏ (composeA da1 s2 da2) (s1 , ss)
+    ＝⟨ ap (_$ (s1 , ss)) (fix-path (langᵏ-body (composeA da1 s2 da2))) ⟩
+  Mreᵏ (DA.ν da1 s1 and DA.ν da2 s2 or νs da2 ss)
+       (λ a → next (langᵏ (composeA da1 s2 da2) ((DA.δ da1 s1 a) , δs da2 (if DA.ν da1 s1 then s2 ∷ ss else ss) a)))
+    ＝⟨ ap² Mreᵏ refl (fun-ext λ a → ▹-ext λ α → go {ih▹ = ih▹}) ⟩
+  apᵏ-body (next apᵏ)
+   (mapᵏ-body _or_ (next (mapᵏ _or_))
+    (·ᵏ-body (next _·ᵏ_) (langᵏ-body da1 (next (langᵏ da1)) s1) (langᵏ-body da2 (next (langᵏ da2)) s2)))
+    (langᵏ-body (powA da2) (next (langᵏ (powA da2))) ss)
+    ＝⟨ sym (zipWithᵏ-eq {b = (·ᵏ-body (next _·ᵏ_) (langᵏ-body da1 (next (langᵏ da1)) s1) (langᵏ-body da2 (next (langᵏ da2)) s2))}) ⟩
+  (·ᵏ-body (next _·ᵏ_) (langᵏ-body da1 (next (langᵏ da1)) s1) (langᵏ-body da2 (next (langᵏ da2)) s2) ⋃ᵏ langᵏ-body (powA da2) (next (langᵏ (powA da2))) ss)
+    ＝⟨ ap (λ q → q (langᵏ-body da1 (next (langᵏ da1)) s1) (langᵏ-body da2 (next (langᵏ da2)) s2) ⋃ᵏ langᵏ-body (powA da2) (next (langᵏ (powA da2))) ss)
+           (sym $ fix-path ·ᵏ-body) ⟩
+  ((langᵏ-body da1 (next (langᵏ da1)) s1 ·ᵏ langᵏ-body da2 (next (langᵏ da2)) s2) ⋃ᵏ langᵏ-body (powA da2) (next (langᵏ (powA da2))) ss)
+    ＝⟨ ap (λ q → (q s1 ·ᵏ langᵏ-body da2 (next (langᵏ da2)) s2) ⋃ᵏ langᵏ-body (powA da2) (next (langᵏ (powA da2))) ss) (sym $ fix-path (langᵏ-body da1)) ⟩
+  ((langᵏ da1 s1 ·ᵏ langᵏ-body da2 (next (langᵏ da2)) s2) ⋃ᵏ langᵏ-body (powA da2) (next (langᵏ (powA da2))) ss)
+    ＝⟨ ap (λ q → (langᵏ da1 s1 ·ᵏ q s2) ⋃ᵏ langᵏ-body (powA da2) (next (langᵏ (powA da2))) ss) (sym $ fix-path (langᵏ-body da2)) ⟩
+  ((langᵏ da1 s1 ·ᵏ langᵏ da2 s2) ⋃ᵏ langᵏ-body (powA da2) (next (langᵏ (powA da2))) ss)
+    ＝⟨ ap (λ q → (langᵏ da1 s1 ·ᵏ langᵏ da2 s2) ⋃ᵏ q ss) (sym $ fix-path (langᵏ-body (powA da2))) ⟩
+  ((langᵏ da1 s1 ·ᵏ langᵏ da2 s2) ⋃ᵏ langᵏ (powA da2) ss)
+    ∎
+  where
+  go : {ih▹ : ▹ κ ((s1 : S₁) (s2 : S₂) (ss : List S₂)
+                   → langᵏ {κ = κ} (composeA da1 s2 da2) (s1 , ss) ＝ ((langᵏ da1 s1 ·ᵏ langᵏ da2 s2) ⋃ᵏ langᵏ (powA da2) ss)) }
+       {s1 : S₁} {s2 : S₂} {ss : List S₂} {a : A} → {@tick α : Tick κ}
+     → (langᵏ (composeA da1 s2 da2) (DA.δ da1 s1 a , δs da2 (if DA.ν da1 s1 then s2 ∷ ss else ss) a))
+         ＝
+       ((▹map _⋃ᵏ_ (condᵏ (DA.ν da1 s1) (next ((langᵏ da1 (DA.δ da1 s1 a)) ·ᵏ (Mreᵏ (DA.ν da2 s2) (λ a₁ → next (langᵏ da2 (DA.δ da2 s2 a₁))))))
+                                        (next (langᵏ da2 (DA.δ da2 s2 a))))
+                ⊛ (next (langᵏ (powA da2) (δs da2 ss a)))) α)
+  go {ih▹} {s1} {s2} {ss} {a} {α} with DA.ν da1 s1
+  ... | true  =
+         (langᵏ (composeA da1 s2 da2) (DA.δ da1 s1 a , δs da2 (s2 ∷ ss) a))
+           ＝⟨ ih▹ α (DA.δ da1 s1 a) s2 (δs da2 (s2 ∷ ss) a) ⟩
+         ((langᵏ da1 (DA.δ da1 s1 a) ·ᵏ langᵏ da2 s2) ⋃ᵏ ⌜ langᵏ (powA da2) (δs da2 (s2 ∷ ss) a) ⌝)
+           ＝⟨ ap! (powA-consᵏ da2 (DA.δ da2 s2 a) (δs da2 ss a)) ⟩
+         ((langᵏ da1 (DA.δ da1 s1 a) ·ᵏ langᵏ da2 s2) ⋃ᵏ (langᵏ da2 (DA.δ da2 s2 a) ⋃ᵏ langᵏ (powA da2) (δs da2 ss a)))
+           ＝⟨ ap (λ q → (langᵏ da1 (DA.δ da1 s1 a) ·ᵏ q s2) ⋃ᵏ (langᵏ da2 (DA.δ da2 s2 a) ⋃ᵏ langᵏ (powA da2) (δs da2 ss a))) (fix-path (langᵏ-body da2)) ⟩
+         (langᵏ da1 (DA.δ da1 s1 a) ·ᵏ Mreᵏ (DA.ν da2 s2) (λ a₁ → next (langᵏ da2 (DA.δ da2 s2 a₁)))) ⋃ᵏ (langᵏ da2 (DA.δ da2 s2 a) ⋃ᵏ langᵏ (powA da2) (δs da2 ss a))
+           ＝⟨ sym (unionᵏ-assoc {k = langᵏ da1 (DA.δ da1 s1 a) ·ᵏ Mreᵏ (DA.ν da2 s2) (λ a₁ → next (langᵏ da2 (DA.δ da2 s2 a₁)))}) ⟩
+         (((langᵏ da1 (DA.δ da1 s1 a) ·ᵏ Mreᵏ (DA.ν da2 s2) (λ a₁ → next (langᵏ da2 (DA.δ da2 s2 a₁)))) ⋃ᵏ langᵏ da2 (DA.δ da2 s2 a)) ⋃ᵏ langᵏ (powA da2) (δs da2 ss a))
+            ∎
+  ... | false =
+         (langᵏ (composeA da1 s2 da2) (DA.δ da1 s1 a , δs da2 ss a))
+           ＝⟨ ih▹ α (DA.δ da1 s1 a) s2 (δs da2 ss a) ⟩
+         ((langᵏ da1 (DA.δ da1 s1 a) ·ᵏ langᵏ da2 s2) ⋃ᵏ langᵏ (powA da2) (δs da2 ss a))
+           ＝⟨ ap (λ q → (langᵏ da1 (DA.δ da1 s1 a) ·ᵏ q s2) ⋃ᵏ langᵏ (powA da2) (δs da2 ss a)) (fix-path (langᵏ-body da2)) ⟩
+         ((langᵏ da1 (DA.δ da1 s1 a) ·ᵏ (Mreᵏ (DA.ν da2 s2) (λ a₁ → next (langᵏ da2 (DA.δ da2 s2 a₁))))) ⋃ᵏ (langᵏ (powA da2) (δs da2 ss a)))
+           ∎
+
+composeA-gen : ∀ {S₁ S₂ : 𝒰 ℓ}
+              → (da1 : DA A S₁) (da2 : DA A S₂)
+              → (s1 : S₁) (s2 : S₂) (ss : List S₂)
+              → lang (composeA da1 s2 da2) (s1 , ss)
+                  ＝
+                (lang da1 s1 · lang da2 s2) ⋃ lang (powA da2) ss
+composeA-gen da1 da2 s1 s2 ss = fun-ext λ κ → composeA-genᵏ da1 da2 s1 s2 ss
+
+composeA-correct : ∀ {S₁ S₂ : 𝒰 ℓ}
+                 → (da1 : DA A S₁) (da2 : DA A S₂)
+                 → (s1 : S₁) (s2 : S₂)
+                 → lang (composeA da1 s2 da2) (s1 , []) ＝ lang da1 s1 · lang da2 s2
+composeA-correct da1 da2 s1 s2 =
+    composeA-gen da1 da2 s1 s2 []
+  ∙ ap ((lang da1 s1 · lang da2 s2) ⋃_) (powA-nil da2)
+  ∙ union-comm {k = lang da1 s1 · lang da2 s2}
+  ∙ union-empty-l {l = lang da1 s1 · lang da2 s2}
