@@ -137,6 +137,10 @@ union-empty-rᵏ : {l : gLang κ A}
                → l ⋃ᵏ ∅ᵏ ＝ l
 union-empty-rᵏ {l} = unionᵏ-comm ∙ union-empty-lᵏ
 
+union-empty-r : {l : Lang A}
+               → l ⋃ ∅ ＝ l
+union-empty-r {l} = union-comm ∙ union-empty-l
+
 union-assoc-commᵏ : {k l m : gLang κ A}
                   → (k ⋃ᵏ l) ⋃ᵏ m ＝ (k ⋃ᵏ m) ⋃ᵏ l
 union-assoc-commᵏ {k} = unionᵏ-assoc ∙ ap (λ q → k ⋃ᵏ q) unionᵏ-comm ∙ sym unionᵏ-assoc
